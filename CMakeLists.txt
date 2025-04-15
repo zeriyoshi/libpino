@@ -94,7 +94,9 @@ if(PINO_ENABLE_COVERAGE)
 endif()
 
 add_library(pino STATIC $<TARGET_OBJECTS:pino-obj>)
-add_library(pino-shared SHARED $<TARGET_OBJECTS:pino-obj>)
+if(BUILD_SHARED_LIBS)
+  add_library(pino-shared SHARED $<TARGET_OBJECTS:pino-obj>)
+endif()
 
 if(PINO_ENABLE_COVERAGE)
   target_link_options(pino PRIVATE "--coverage")
