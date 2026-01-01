@@ -1,0 +1,20 @@
+{
+  "name": "libpino",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.vscode-github-actions",
+        "ms-azuretools.vscode-containers",
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.makefile-tools",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+  "build": {
+    "dockerfile": "Dockerfile",
+    "target": "devcontainer"
+  }
+}
