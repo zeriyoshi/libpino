@@ -1,0 +1,135 @@
+# libpino
+
+cmake_minimum_required(VERSION 3.25)
+project(pino
+  VERSION 0.0.0
+  LANGUAGES C
+  DESCRIPTION "Packageing Notation - PINO"
+)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# buildtime
+include(cmake/buildtime.cmake)
+
+include(GNUInstallDirs)
+
+option(PINO_USE_SIMD "Enable SIMD optimizations" ON)
+option(PINO_USE_VALGRIND "Use Valgrind if available" OFF)
+option(PINO_USE_COVERAGE "Use coverage if available" OFF)
+option(PINO_USE_TESTS "Use tests" OFF)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT EMSCRIPTEN AND NOT MSVC)
+  message(STATUS "Enabled debug")
+
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -fno-inline -fno-omit-frame-pointer")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fno-inline -fno-omit-frame-pointer")
+
+  find_program(VALGRIND "valgrind")
+  if(PINO_USE_VALGRIND AND VALGRIND)
+    message(STATUS "Found Valgrind: ${VALGRIND}")
+    set(PINO_ENABLE_VALGRIND ON)
+  else()
+    set(PINO_ENABLE_VALGRIND OFF)
+  endif()
+
+  if(PINO_USE_COVERAGE)
+    find_program(LCOV lcov)
+    find_program(GENHTML genhtml)
+    
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+      if(LCOV AND GENHTML)
+        set(PINO_ENABLE_COVERAGE ON)
+        add_definitions(-DPINO_COVERAGE)
+
+        if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+          link_libraries(gcov)
+        endif()
+      else()
+        message(WARNING "lcov or genhtml not found, disabling coverage")
+        set(PINO_ENABLE_COVERAGE OFF)
+      endif()
+    else()
+      message(WARNING "Coverage is supported only with GCC compilers")
+      set(PINO_ENABLE_COVERAGE OFF)
+    endif()
+  else()
+    set(PINO_ENABLE_COVERAGE OFF)
+  endif()
+else()
+  set(PINO_ENABLE_VALGRIND OFF)
+  set(PINO_ENABLE_COVERAGE OFF)
+endif()
+
+file(GLOB SOURCES "src/*.c")
+file(GLOB_RECURSE HEADERS "include/*.h")
+
+if(EMSCRIPTEN)
+  include(cmake/emscripten.cmake)
+endif()
+
+add_library(pino-obj OBJECT ${SOURCES})
+target_include_directories(pino-obj PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+if(PINO_USE_SIMD)
+  if(EMSCRIPTEN)
+    target_compile_options(pino-obj PRIVATE -msimd128)
+    target_compile_definitions(pino-obj PRIVATE PINO_USE_SIMD=1 PINO_SIMD_WASM=1)
+    message(STATUS "SIMD enabled: WebAssembly SIMD128")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)")
+    target_compile_definitions(pino-obj PRIVATE PINO_USE_SIMD=1 PINO_SIMD_NEON=1)
+    message(STATUS "SIMD enabled: ARM NEON")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)")
+    if(MSVC)
+      target_compile_options(pino-obj PRIVATE /arch:AVX2)
+    else()
+      target_compile_options(pino-obj PRIVATE -mavx2)
+    endif()
+    target_compile_definitions(pino-obj PRIVATE PINO_USE_SIMD=1 PINO_SIMD_AVX2=1)
+    message(STATUS "SIMD enabled: x86_64 AVX2")
+  else()
+    message(STATUS "SIMD requested but not available for this architecture")
+    target_compile_definitions(pino-obj PRIVATE PINO_USE_SIMD=0)
+  endif()
+else()
+  target_compile_definitions(pino-obj PRIVATE PINO_USE_SIMD=0)
+  message(STATUS "SIMD disabled")
+endif()
+
+if(PINO_ENABLE_COVERAGE)
+  target_compile_options(pino-obj PRIVATE "--coverage")
+  target_link_options(pino-obj PRIVATE "--coverage")
+endif()
+
+add_library(pino STATIC $<TARGET_OBJECTS:pino-obj>)
+add_library(pino-shared SHARED $<TARGET_OBJECTS:pino-obj>)
+
+if(PINO_ENABLE_COVERAGE)
+  target_link_options(pino PRIVATE "--coverage")
+endif()
+
+install(
+  FILES ${HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pino
+)
+
+install(
+  TARGETS pino
+  EXPORT pino-targets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+if(PINO_USE_TESTS)
+  include(cmake/test.cmake)
+endif()
