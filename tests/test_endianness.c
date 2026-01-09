@@ -675,8 +675,8 @@ void test_simd_memcpy_large_array_32bit(void) {
 
   for (i = 0; i < num_elements; i++) {
     if (dest[i] != expected[i]) {
-      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%08X, got 0x%08X",
-               i, expected[i], dest[i]);
+      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%08X, got 0x%08X", i,
+               expected[i], dest[i]);
       TEST_FAIL_MESSAGE(msg);
     }
   }
@@ -695,8 +695,8 @@ void test_simd_memcpy_large_array_32bit(void) {
 
   for (i = 0; i < num_elements; i++) {
     if (dest[i] != expected[i]) {
-      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%08X, got 0x%08X",
-               i, expected[i], dest[i]);
+      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%08X, got 0x%08X", i,
+               expected[i], dest[i]);
       TEST_FAIL_MESSAGE(msg);
     }
   }
@@ -730,8 +730,9 @@ void test_simd_memcpy_large_array_64bit(void) {
 
   for (i = 0; i < num_elements; i++) {
     if (dest[i] != expected[i]) {
-      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%016llX, got 0x%016llX",
-               i, (unsigned long long)expected[i], (unsigned long long)dest[i]);
+      snprintf(msg, sizeof(msg),
+               "Element %zu: expected 0x%016llX, got 0x%016llX", i,
+               (unsigned long long)expected[i], (unsigned long long)dest[i]);
       TEST_FAIL_MESSAGE(msg);
     }
   }
@@ -750,8 +751,9 @@ void test_simd_memcpy_large_array_64bit(void) {
 
   for (i = 0; i < num_elements; i++) {
     if (dest[i] != expected[i]) {
-      snprintf(msg, sizeof(msg), "Element %zu: expected 0x%016llX, got 0x%016llX",
-               i, (unsigned long long)expected[i], (unsigned long long)dest[i]);
+      snprintf(msg, sizeof(msg),
+               "Element %zu: expected 0x%016llX, got 0x%016llX", i,
+               (unsigned long long)expected[i], (unsigned long long)dest[i]);
       TEST_FAIL_MESSAGE(msg);
     }
   }
@@ -779,17 +781,18 @@ void test_simd_byteswap_pattern(void) {
 
   for (i = 0; i < num_elements; i++) {
     dest_bytes = (uint8_t *)&dest[i];
-    
+
     if (is_little_endian()) {
       b0 = (i * 4) + 0;
       b1 = (i * 4) + 1;
       b2 = (i * 4) + 2;
       b3 = (i * 4) + 3;
-      
-      if (dest_bytes[0] != b3 || dest_bytes[1] != b2 || 
-          dest_bytes[2] != b1 || dest_bytes[3] != b0) {
-        snprintf(msg, sizeof(msg), 
-                 "Element %zu byte order wrong: got [%02X,%02X,%02X,%02X], expected [%02X,%02X,%02X,%02X]",
+
+      if (dest_bytes[0] != b3 || dest_bytes[1] != b2 || dest_bytes[2] != b1 ||
+          dest_bytes[3] != b0) {
+        snprintf(msg, sizeof(msg),
+                 "Element %zu byte order wrong: got [%02X,%02X,%02X,%02X], "
+                 "expected [%02X,%02X,%02X,%02X]",
                  i, dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3],
                  b3, b2, b1, b0);
         TEST_FAIL_MESSAGE(msg);

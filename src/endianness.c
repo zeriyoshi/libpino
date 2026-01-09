@@ -35,8 +35,6 @@ static inline uint8_t platform_endianness(void) {
   return g_endianness = (p[0] == 1) ? ENDIANNESS_LITTLE : ENDIANNESS_BIG;
 }
 
-
-
 static inline void *bswap_memcpy(void *dest, const void *src, size_t size,
                                  size_t elem_size) {
   const uint8_t *sp;
@@ -79,9 +77,9 @@ static inline void *bswap_memcpy(void *dest, const void *src, size_t size,
     simd_elements = num_elements / 8;
 
     if ((((uintptr_t)dest | (uintptr_t)src) & 0x1f) == 0 && simd_elements > 0) {
-      shuffle_mask =
-          _mm256_set_epi8(28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22, 23, 16, 17, 18, 19,
-                          12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
+      shuffle_mask = _mm256_set_epi8(28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22,
+                                     23, 16, 17, 18, 19, 12, 13, 14, 15, 8, 9,
+                                     10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
 
       for (i = 0; i < simd_elements; i++) {
         data = _mm256_load_si256((__m256i *)(src32 + i * 8));
@@ -108,9 +106,9 @@ static inline void *bswap_memcpy(void *dest, const void *src, size_t size,
     simd_elements = num_elements / 4;
 
     if ((((uintptr_t)dest | (uintptr_t)src) & 0x1f) == 0 && simd_elements > 0) {
-      shuffle_mask =
-          _mm256_set_epi8(24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21, 22, 23,
-                          8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7);
+      shuffle_mask = _mm256_set_epi8(24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18,
+                                     19, 20, 21, 22, 23, 8, 9, 10, 11, 12, 13,
+                                     14, 15, 0, 1, 2, 3, 4, 5, 6, 7);
 
       for (i = 0; i < simd_elements; i++) {
         data = _mm256_load_si256((__m256i *)(src64 + i * 4));
