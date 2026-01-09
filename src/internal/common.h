@@ -24,7 +24,7 @@
 #endif
 
 #define HANDLER_STEP 8
-#define MM_STEP 16
+#define MM_STEP      16
 
 #define PINO_VERSION_ID 10000000
 
@@ -32,61 +32,55 @@
 #define PINO_BUILDTIME 0
 #endif
 
-#define pmemcpy(dest, src, size) memcpy(dest, src, size)
-#define pmemcpy_n2l(dest, src, size)                                           \
-  pino_endianness_memcpy_native2le(dest, src, size)
-#define pmemcpy_n2b(dest, src, size)                                           \
-  pino_endianness_memcpy_native2be(dest, src, size)
-#define pmemcpy_l2n(dest, src, size)                                           \
-  pino_endianness_memcpy_le2native(dest, src, size)
-#define pmemcpy_b2n(dest, src, size)                                           \
-  pino_endianness_memcpy_be2native(dest, src, size)
-#define pmemmove(dest, src, size) memmove(dest, src, size)
-#define pmemcmp(s1, s2, size) memcmp(s1, s2, size)
-#define pmalloc(size) malloc(size)
-#define pcalloc(count, size) calloc(count, size)
-#define prealloc(ptr, size) realloc(ptr, size)
-#define pfree(ptr) free(ptr)
+#define pmemcpy(dest, src, size)     memcpy(dest, src, size)
+#define pmemcpy_n2l(dest, src, size) pino_endianness_memcpy_native2le(dest, src, size)
+#define pmemcpy_n2b(dest, src, size) pino_endianness_memcpy_native2be(dest, src, size)
+#define pmemcpy_l2n(dest, src, size) pino_endianness_memcpy_le2native(dest, src, size)
+#define pmemcpy_b2n(dest, src, size) pino_endianness_memcpy_be2native(dest, src, size)
+#define pmemmove(dest, src, size)    memmove(dest, src, size)
+#define pmemcmp(s1, s2, size)        memcmp(s1, s2, size)
+#define pmalloc(size)                malloc(size)
+#define pcalloc(count, size)         calloc(count, size)
+#define prealloc(ptr, size)          realloc(ptr, size)
+#define pfree(ptr)                   free(ptr)
 
 typedef struct {
-  size_t usage;
-  size_t capacity;
-  void **ptrs;
+    size_t usage;
+    size_t capacity;
+    void **ptrs;
 } mm_t;
 
 typedef struct {
-  pino_magic_t magic;
-  mm_t mm;
-  pino_handler_t *handler;
+    pino_magic_t magic;
+    mm_t mm;
+    pino_handler_t *handler;
 } handler_entry_t;
 
-static inline bool validate_magic(pino_magic_safe_t magic) {
-  size_t i;
-  const char *valid_chars =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+static inline bool validate_magic(pino_magic_safe_t magic)
+{
+    size_t i;
+    const char *valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-  if (!magic) {
-    return false;
-  }
-
-  /* Check length first */
-  if (strlen((const char *)magic) != sizeof(pino_magic_t)) {
-    return false;
-  }
-
-  /* Check each character without relying on pino_magic_t being NULL-terminated
-   */
-  for (i = 0; i < sizeof(pino_magic_t); i++) {
-    if (strchr(valid_chars, magic[i]) == NULL) {
-      return false;
+    if (!magic) {
+        return false;
     }
-  }
 
-  return true;
+    if (strlen((const char *)magic) != sizeof(pino_magic_t)) {
+        return false;
+    }
+
+    for (i = 0; i < sizeof(pino_magic_t); i++) {
+        if (strchr(valid_chars, magic[i]) == NULL) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
-static inline bool magic_equal(pino_magic_t magic, pino_magic_safe_t smagic) {
-  return strncmp(magic, smagic, sizeof(pino_magic_t)) == 0;
+static inline bool magic_equal(pino_magic_t magic, pino_magic_safe_t smagic)
+{
+    return strncmp(magic, smagic, sizeof(pino_magic_t)) == 0;
 }
 
 bool pino_handler_init(size_t initialize_size);

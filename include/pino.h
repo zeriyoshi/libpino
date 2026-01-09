@@ -28,11 +28,11 @@ typedef char pino_magic_safe_t[sizeof(pino_magic_t) + 1]; /* + '\0' */
 typedef uint64_t pino_static_fields_size_t;
 
 typedef struct {
-  pino_magic_safe_t magic;
-  pino_static_fields_size_t static_fields_size;
-  pino_handler_t *handler;
-  void *static_fields;
-  void *this;
+    pino_magic_safe_t magic;
+    pino_static_fields_size_t static_fields_size;
+    pino_handler_t *handler;
+    void *static_fields;
+    void *this;
 } pino_t;
 
 bool pino_init(void);

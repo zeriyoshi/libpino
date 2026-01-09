@@ -12,14 +12,6 @@
 
 #include <stdint.h>
 
-#if defined(_MSC_VER)
-#define PINO_ALIGNED(x) __declspec(align(x))
-#elif defined(__GNUC__) || defined(__clang__)
-#define PINO_ALIGNED(x) __attribute__((aligned(x)))
-#else
-#define PINO_ALIGNED(x)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

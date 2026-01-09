@@ -13,7 +13,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Include appropriate SIMD headers based on CMake definitions */
 #if defined(PINO_SIMD_AVX2)
 #include <immintrin.h>
 #elif defined(PINO_SIMD_NEON)
