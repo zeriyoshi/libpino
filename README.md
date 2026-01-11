@@ -41,6 +41,9 @@ cmake --build build
 | `PINO_USE_TESTS` | `OFF` | Build test suite |
 | `PINO_USE_VALGRIND` | `OFF` | Enable Valgrind memory checking |
 | `PINO_USE_COVERAGE` | `OFF` | Enable code coverage |
+| `PINO_USE_ASAN` | `OFF` | Enable AddressSanitizer |
+| `PINO_USE_MSAN` | `OFF` | Enable MemorySanitizer |
+| `PINO_USE_UBSAN` | `OFF` | Enable UndefinedBehaviorSanitizer |
 
 ### Running Tests
 

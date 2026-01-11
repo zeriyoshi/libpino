@@ -41,6 +41,9 @@ cmake --build build
 | `PINO_USE_TESTS` | `OFF` | テストスイートをビルド |
 | `PINO_USE_VALGRIND` | `OFF` | Valgrind メモリチェックを有効化 |
 | `PINO_USE_COVERAGE` | `OFF` | コードカバレッジを有効化 |
+| `PINO_USE_ASAN` | `OFF` | AddressSanitizer を有効化 |
+| `PINO_USE_MSAN` | `OFF` | MemorySanitizer を有効化 |
+| `PINO_USE_UBSAN` | `OFF` | UndefinedBehaviorSanitizer を有効化 |
 
 ### テストの実行
 

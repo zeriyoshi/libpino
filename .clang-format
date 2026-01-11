@@ -100,10 +100,6 @@ IncludeCategories:
   - Regex: '^<lierre/'
     Priority: 2
   # Third-party headers
-  - Regex: '^<poporon\.h>'
-    Priority: 3
-  - Regex: '^<poporon/'
-    Priority: 3
   - Regex: '^<'
     Priority: 3
   # Project internal headers
