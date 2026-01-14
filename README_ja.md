@@ -62,81 +62,81 @@ ctest --test-dir build --output-on-failure
 #include <string.h>
 
 // データ構造用のカスタムハンドラーを定義
-PH_BEGIN(mydata);
+PH_BEGIN(mydt);
 
-PH_DEF_STATIC_FIELDS_STRUCT(mydata) {
+PH_DEF_STATIC_FIELDS_STRUCT(mydt) {
     uint32_t data_size;
 }
 PH_DEF_STATIC_FIELDS_STRUCT_END;
 
-PH_DEF_STRUCT(mydata) {
+PH_DEF_STRUCT(mydt) {
     uint8_t *buffer;
 }
 PH_DEF_STRUCT_END;
 
-PH_DEFUN_SERIALIZE_SIZE(mydata) {
+PH_DEFUN_SERIALIZE_SIZE(mydt) {
     uint32_t size;
-    PH_THIS_STATIC_GET(mydata, data_size, &size);
+    PH_THIS_STATIC_GET(mydt, data_size, &size);
     return (size_t)size;
 }
 
-PH_DEFUN_SERIALIZE(mydata) {
+PH_DEFUN_SERIALIZE(mydt) {
     uint32_t size;
-    PH_THIS_STATIC_GET(mydata, data_size, &size);
-    PH_SERIALIZE_DATA(mydata, buffer, (size_t)size);
+    PH_THIS_STATIC_GET(mydt, data_size, &size);
+    PH_SERIALIZE_DATA(mydt, buffer, (size_t)size);
     return true;
 }
 
-PH_DEFUN_UNSERIALIZE(mydata) {
+PH_DEFUN_UNSERIALIZE(mydt) {
     uint32_t size;
-    PH_THIS_STATIC_GET(mydata, data_size, &size);
-    PH_UNSERIALIZE_DATA(mydata, buffer, (size_t)size);
+    PH_THIS_STATIC_GET(mydt, data_size, &size);
+    PH_UNSERIALIZE_DATA(mydt, buffer, (size_t)size);
     return true;
 }
 
-PH_DEFUN_PACK(mydata) {
+PH_DEFUN_PACK(mydt) {
     uint32_t size = (uint32_t)PH_ARG_SIZE;
-    PH_THIS_STATIC_SET(mydata, data_size, &size);
-    PH_PACK_DATA(mydata, buffer, PH_ARG_SIZE);
+    PH_THIS_STATIC_SET(mydt, data_size, &size);
+    PH_PACK_DATA(mydt, buffer, PH_ARG_SIZE);
     return true;
 }
 
-PH_DEFUN_UNPACK_SIZE(mydata) {
+PH_DEFUN_UNPACK_SIZE(mydt) {
     uint32_t size;
-    PH_THIS_STATIC_GET(mydata, data_size, &size);
+    PH_THIS_STATIC_GET(mydt, data_size, &size);
     return (size_t)size;
 }
 
-PH_DEFUN_UNPACK(mydata) {
+PH_DEFUN_UNPACK(mydt) {
     uint32_t size;
-    PH_THIS_STATIC_GET(mydata, data_size, &size);
-    PH_UNPACK_DATA(mydata, buffer, (size_t)size);
+    PH_THIS_STATIC_GET(mydt, data_size, &size);
+    PH_UNPACK_DATA(mydt, buffer, (size_t)size);
     return true;
 }
 
-PH_DEFUN_CREATE(mydata) {
-    PH_CREATE_THIS(mydata);
+PH_DEFUN_CREATE(mydt) {
+    PH_CREATE_THIS(mydt);
     
-    PH_THIS(mydata)->buffer = (uint8_t *)PH_CALLOC(mydata, 1, PH_ARG_SIZE);
-    if (!PH_THIS(mydata)->buffer) {
-        PH_DESTROY_THIS(mydata);
+    PH_THIS(mydt)->buffer = (uint8_t *)PH_CALLOC(mydt, 1, PH_ARG_SIZE);
+    if (!PH_THIS(mydt)->buffer) {
+        PH_DESTROY_THIS(mydt);
         return NULL;
     }
     
     uint32_t size = (uint32_t)PH_ARG_SIZE;
-    PH_THIS_STATIC_SET(mydata, data_size, &size);
+    PH_THIS_STATIC_SET(mydt, data_size, &size);
     
-    return PH_THIS(mydata);
+    return PH_THIS(mydt);
 }
 
-PH_DEFUN_DESTROY(mydata) {
-    if (PH_THIS(mydata)->buffer) {
-        PH_FREE(mydata, PH_THIS(mydata)->buffer);
+PH_DEFUN_DESTROY(mydt) {
+    if (PH_THIS(mydt)->buffer) {
+        PH_FREE(mydt, PH_THIS(mydt)->buffer);
     }
-    PH_DESTROY_THIS(mydata);
+    PH_DESTROY_THIS(mydt);
 }
 
-PH_END(mydata);
+PH_END(mydt);
 
 int main(void) {
     // PINO を初期化
@@ -146,7 +146,7 @@ int main(void) {
     }
     
     // ハンドラーを登録
-    if (!PH_REG(mydata)) {
+    if (!PH_REG(mydt)) {
         fprintf(stderr, "ハンドラーの登録に失敗しました\n");
         pino_free();
         return 1;
@@ -157,10 +157,10 @@ int main(void) {
     size_t message_len = strlen(message) + 1;
     
     // データをパック
-    pino_t *pino = pino_pack("mydata", message, message_len);
+    pino_t *pino = pino_pack("mydt", message, message_len);
     if (!pino) {
         fprintf(stderr, "データのパックに失敗しました\n");
-        PH_UNREG(mydata);
+        PH_UNREG(mydt);
         pino_free();
         return 1;
     }
@@ -172,7 +172,7 @@ int main(void) {
         fprintf(stderr, "シリアライズに失敗しました\n");
         free(serialized);
         pino_destroy(pino);
-        PH_UNREG(mydata);
+        PH_UNREG(mydt);
         pino_free();
         return 1;
     }
@@ -185,7 +185,7 @@ int main(void) {
     
     if (!restored) {
         fprintf(stderr, "デシリアライズに失敗しました\n");
-        PH_UNREG(mydata);
+        PH_UNREG(mydt);
         pino_free();
         return 1;
     }
@@ -197,7 +197,7 @@ int main(void) {
         fprintf(stderr, "アンパックに失敗しました\n");
         free(unpacked);
         pino_destroy(restored);
-        PH_UNREG(mydata);
+        PH_UNREG(mydt);
         pino_free();
         return 1;
     }
@@ -207,7 +207,7 @@ int main(void) {
     // クリーンアップ
     free(unpacked);
     pino_destroy(restored);
-    PH_UNREG(mydata);
+    PH_UNREG(mydt);
     pino_free();
     
     return 0;
