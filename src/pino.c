@@ -121,6 +121,10 @@ extern pino_t *pino_unserialize(const void *src, size_t size)
         return NULL;
     }
 
+    if (fields_size != handler->static_fields_size) {
+        return NULL;
+    }
+
     pino = pino_create(magic, handler, size - sizeof(pino_magic_t) - sizeof(pino_static_fields_size_t) - fields_size);
     if (!pino) {
         return NULL;
