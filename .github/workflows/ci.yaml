@@ -65,7 +65,7 @@ jobs:
           tar -xzf "project.tar.gz" --strip-components=1
           rm -rf "project.tar.gz"
       - name: Setup QEMU
-        if: ${{ matrix.platform == 'linux/s390x' && '1' || '0' }}
+        if: ${{ matrix.platform == 'linux/s390x' }}
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
         with:
           platforms: "s390x"
@@ -73,6 +73,7 @@ jobs:
         run: |
           docker build \
             --tag "ci" \
+            --platform="${{ matrix.platform }}" \
             --build-arg PLATFORM="${{ matrix.platform }}" \
             --build-arg ENABLE_VALGRIND="${{ matrix.platform == 'linux/s390x' && '0' || '1' }}" \
             --build-arg ENABLE_CLANG="${{ (matrix.platform == 'linux/s390x' || matrix.platform == 'linux/i386') && '0' || '1' }}" \
