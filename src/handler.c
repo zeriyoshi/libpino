@@ -150,7 +150,7 @@ extern bool pino_handler_unregister(pino_magic_safe_t magic)
         return false;
     }
 
-    for (i = 0; i < g_handlers.usage; i++) {
+    for (i = 0; i < g_handlers.capacity; i++) {
         if (g_handlers.entries[i] && magic_equal(g_handlers.entries[i]->magic, magic)) {
             pino_memory_manager_obj_free(&g_handlers.entries[i]->mm);
             pfree(g_handlers.entries[i]);
@@ -172,7 +172,7 @@ extern pino_handler_t *pino_handler_find(pino_magic_safe_t magic)
         return NULL;
     }
 
-    for (i = 0; i < g_handlers.usage; i++) {
+    for (i = 0; i < g_handlers.capacity; i++) {
         if (g_handlers.entries[i] && magic_equal(g_handlers.entries[i]->magic, magic)) {
             return g_handlers.entries[i]->handler;
         }

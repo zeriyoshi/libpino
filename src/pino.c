@@ -134,7 +134,7 @@ extern pino_t *pino_unserialize(const void *src, size_t size)
     pmemcpy(pino->static_fields, ((char *)src) + sizeof(pino_magic_t) + sizeof(pino_static_fields_size_t), fields_size);
     if (!handler->unserialize(pino->this, pino->static_fields,
                               ((char *)src) + sizeof(pino_magic_t) + sizeof(pino_static_fields_size_t) + fields_size,
-                              size)) {
+                              size - sizeof(pino_magic_t) - sizeof(pino_static_fields_size_t) - fields_size)) {
         pino_destroy(pino);
         return NULL;
     }
