@@ -112,7 +112,7 @@ extern pino_t *pino_unserialize(const void *src, size_t size)
     pmemcpy(magic, src, sizeof(pino_magic_t));
     pmemcpy_l2n(&fields_size, ((char *)src) + sizeof(pino_magic_t), sizeof(pino_static_fields_size_t));
 
-    if (size < sizeof(pino_magic_t) + sizeof(pino_static_fields_size_t) + fields_size) {
+    if (fields_size > size - sizeof(pino_magic_t) - sizeof(pino_static_fields_size_t)) {
         return NULL;
     }
 

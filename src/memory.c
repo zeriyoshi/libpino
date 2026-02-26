@@ -106,13 +106,20 @@ extern void *pino_memory_manager_malloc(/* handler_entry_t */ void *entry, size_
 extern void *pino_memory_manager_calloc(/* handler_entry_t */ void *entry, size_t count, size_t size)
 {
     void *ptr;
+    size_t total;
 
-    ptr = pino_memory_manager_malloc(entry, count * size);
+    if (size != 0 && count > SIZE_MAX / size) {
+        return NULL;
+    }
+
+    total = count * size;
+
+    ptr = pino_memory_manager_malloc(entry, total);
     if (!ptr) {
         return NULL;
     }
 
-    memset(ptr, 0, count * size);
+    memset(ptr, 0, total);
 
     return ptr;
 }
