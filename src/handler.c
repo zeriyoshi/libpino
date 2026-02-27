@@ -22,20 +22,28 @@ static struct {
 static inline bool glow_handlers(size_t step)
 {
     handler_entry_t **entries;
-    size_t i;
+    size_t i, new_capacity;
 
-    entries =
-        (handler_entry_t **)prealloc(g_handlers.entries, (g_handlers.capacity + step) * sizeof(handler_entry_t *));
+    if (step > SIZE_MAX - g_handlers.capacity) {
+        return false;
+    }
+    new_capacity = g_handlers.capacity + step;
+
+    if (new_capacity > SIZE_MAX / sizeof(handler_entry_t *)) {
+        return false;
+    }
+
+    entries = (handler_entry_t **)prealloc(g_handlers.entries, new_capacity * sizeof(handler_entry_t *));
     if (!entries) {
         return false;
     }
 
-    for (i = g_handlers.capacity; i < g_handlers.capacity + step; i++) {
+    for (i = g_handlers.capacity; i < new_capacity; i++) {
         entries[i] = NULL;
     }
 
     g_handlers.entries = entries;
-    g_handlers.capacity += step;
+    g_handlers.capacity = new_capacity;
 
     return true;
 }
@@ -78,6 +86,7 @@ extern void pino_handler_free(void)
     for (i = 0; i < g_handlers.capacity; i++) {
         if (g_handlers.entries[i]) {
             pino_memory_manager_obj_free(&g_handlers.entries[i]->mm);
+            g_handlers.entries[i]->handler->entry = NULL;
             pfree(g_handlers.entries[i]);
             g_handlers.entries[i] = NULL;
             --g_handlers.usage;
@@ -98,6 +107,11 @@ extern bool pino_handler_register(pino_magic_safe_t magic, pino_handler_t *handl
         return false;
     }
 
+    if (!handler->create || !handler->destroy || !handler->pack || !handler->unserialize || !handler->serialize_size ||
+        !handler->serialize || !handler->unpack_size || !handler->unpack) {
+        return false;
+    }
+
     if (!validate_magic(magic)) {
         return false;
     }
@@ -107,6 +121,10 @@ extern bool pino_handler_register(pino_magic_safe_t magic, pino_handler_t *handl
     }
 
     if (g_handlers.usage >= g_handlers.capacity) {
+        if (g_handlers.capacity > SIZE_MAX - HANDLER_STEP) {
+            return false;
+        }
+
         if (!glow_handlers(g_handlers.capacity + HANDLER_STEP)) {
             return false;
         }
@@ -124,6 +142,8 @@ extern bool pino_handler_register(pino_magic_safe_t magic, pino_handler_t *handl
 
     pmemcpy(entry->magic, magic, sizeof(pino_magic_t));
     entry->handler = handler;
+    entry->refcount = 0;
+    entry->unregistered = false;
     handler->entry = entry;
 
     for (i = 0; i < g_handlers.capacity; i++) {
@@ -134,6 +154,10 @@ extern bool pino_handler_register(pino_magic_safe_t magic, pino_handler_t *handl
             return true;
         }
     }
+
+    pino_memory_manager_obj_free(&entry->mm);
+    handler->entry = NULL;
+    pfree(entry);
 
     return false;
 }
@@ -152,8 +176,12 @@ extern bool pino_handler_unregister(pino_magic_safe_t magic)
 
     for (i = 0; i < g_handlers.capacity; i++) {
         if (g_handlers.entries[i] && magic_equal(g_handlers.entries[i]->magic, magic)) {
-            pino_memory_manager_obj_free(&g_handlers.entries[i]->mm);
-            pfree(g_handlers.entries[i]);
+            g_handlers.entries[i]->unregistered = true;
+            if (g_handlers.entries[i]->refcount == 0) {
+                pino_memory_manager_obj_free(&g_handlers.entries[i]->mm);
+                g_handlers.entries[i]->handler->entry = NULL;
+                pfree(g_handlers.entries[i]);
+            }
             g_handlers.entries[i] = NULL;
             --g_handlers.usage;
 

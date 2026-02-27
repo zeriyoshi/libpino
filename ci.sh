@@ -20,7 +20,7 @@ if type "clang" > /dev/null 2>&1 && type "clang++" > /dev/null 2>&1; then
   cmake --build "build" --parallel
   ctest --build-config "Debug" --test-dir "build" --output-on-failure --parallel
 
-  for SANITIZER in "ASAN" "UBSAN" "MSAN"; do
+  for SANITIZER in "ASAN" "UBSAN" "MSAN" "TSAN"; do
     rm -rf "build"
     cmake -B "build" \
       -DCMAKE_C_COMPILER="$(command -v "clang")" \

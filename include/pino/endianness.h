@@ -10,7 +10,10 @@
 #ifndef PINO_ENDIANNESS_H
 #define PINO_ENDIANNESS_H
 
+#include <limits.h>
 #include <stddef.h>
+
+#define PINO_MEMCMP_ERROR INT_MIN
 
 #ifdef __cplusplus
 extern "C" {

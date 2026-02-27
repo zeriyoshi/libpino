@@ -98,7 +98,7 @@ static inline int memcmp_common(const void *s1, const void *s2, size_t size, boo
         if (tmp2) {
             pfree(tmp2);
         }
-        return 0;
+        return PINO_MEMCMP_ERROR;
     }
 
     elem_size = elem_sizeof(size);

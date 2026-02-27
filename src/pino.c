@@ -45,6 +45,8 @@ static inline pino_t *pino_create(pino_magic_safe_t magic, pino_handler_t *handl
         return NULL;
     }
 
+    ((handler_entry_t *)handler->entry)->refcount++;
+
     return pino;
 }
 
@@ -185,9 +187,13 @@ extern bool pino_unpack(const pino_t *pino, void *dest)
 
 extern void pino_destroy(pino_t *pino)
 {
+    handler_entry_t *entry;
+
     if (!pino) {
         return;
     }
+
+    entry = (handler_entry_t *)pino->handler->entry;
 
     if (pino->this) {
         pino->handler->destroy(pino->this, pino->static_fields);
@@ -198,6 +204,15 @@ extern void pino_destroy(pino_t *pino)
     }
 
     pfree(pino);
+
+    if (entry) {
+        entry->refcount--;
+        if (entry->refcount == 0 && entry->unregistered) {
+            pino_memory_manager_obj_free(&entry->mm);
+            entry->handler->entry = NULL;
+            pfree(entry);
+        }
+    }
 }
 
 extern uint32_t pino_version_id()

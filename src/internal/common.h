@@ -54,6 +54,8 @@ typedef struct {
     pino_magic_t magic;
     mm_t mm;
     pino_handler_t *handler;
+    size_t refcount;
+    bool unregistered;
 } handler_entry_t;
 
 static inline bool validate_magic(pino_magic_safe_t magic)
